@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI Hallucination Stress Tester — Submit any question to detect AI hallucinations using LLM generation, RAG evidence retrieval, and semantic verification." />
+  <title>AI Hallucination Stress Tester</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========================================================
+       BACKGROUND
+  ======================================================== -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- ========================================================
+       HEADER
+  ======================================================== -->
+  <header class="site-header" role="banner">
+    <div class="header-inner container">
+      <div class="logo-group">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="14" r="13" stroke="url(#logoGrad)" stroke-width="2"/>
+            <path d="M9 14l3.5 3.5L19 10" stroke="url(#logoGrad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="logo-text">HallucinationTest<span class="logo-accent">.ai</span></span>
+      </div>
+      <div class="header-badge">
+        <span class="badge-dot" aria-hidden="true"></span>
+        <span>LLM + RAG Verification</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================
+       MAIN
+  ======================================================== -->
+  <main class="main-layout container" role="main">
+
+    <!-- ─── Hero / Input Section ─── -->
+    <section class="hero-section" aria-labelledby="hero-heading">
+      <div class="hero-label">AI HALLUCINATION STRESS TESTER</div>
+      <h1 id="hero-heading" class="hero-title">
+        Does Your AI<br />
+        <span class="gradient-text">Actually Know This?</span>
+      </h1>
+      <p class="hero-sub">
+        Enter any question. Our system generates an LLM answer, retrieves real evidence via RAG,
+        and verifies whether the answer is actually supported — exposing hallucinations in real time.
+      </p>
+
+      <div class="input-card glass-card" role="form" aria-label="Question input form">
+        <label for="question-input" class="input-label">Your Question</label>
+        <div class="input-wrapper">
+          <textarea
+            id="question-input"
+            name="question"
+            class="question-textarea"
+            placeholder="Ask anything — e.g. How does CRISPR gene editing work? Who signed the Magna Carta? What is quantum entanglement?"
+            rows="3"
+            maxlength="2000"
+            aria-describedby="char-count input-hint"
+            autocomplete="off"
+            spellcheck="true"
+          ></textarea>
+          <div class="input-footer">
+            <span id="input-hint" class="input-hint">Any question works — the system is fully dynamic</span>
+            <span id="char-count" class="char-count" aria-live="polite">0 / 2000</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            id="analyze-btn"
+            class="analyze-btn"
+            type="button"
+            aria-label="Analyze the question for hallucination risk"
+          >
+            <span class="btn-idle">
+              <svg class="btn-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M9 5.5v3.5l2.5 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              Analyze Answer
+            </span>
+            <span class="btn-loading" aria-hidden="true">
+              <svg class="btn-spinner" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <circle cx="9" cy="9" r="7" stroke="currentColor" stroke-opacity="0.3" stroke-width="2"/>
+                <path d="M9 2a7 7 0 0 1 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              Analyzing...
+            </span>
+          </button>
+          <div class="secondary-actions">
+            <button id="clear-btn" class="action-btn" type="button" aria-label="Clear question and results">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+              Clear
+            </button>
+            <button id="try-again-btn" class="action-btn" type="button" aria-label="Reset and try another question">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M2 7a5 5 0 1 0 1.5-3.54" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 3v4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Try Again
+            </button>
+          </div>
+        </div>
+
+        <!-- Inline error -->
+        <div id="form-error" class="form-error" role="alert" aria-live="assertive" hidden></div>
+      </div>
+
+      <!-- Pipeline badges -->
+      <div class="pipeline-badges" aria-label="Processing pipeline steps">
+        <div class="pipeline-badge">
+          <div class="pipeline-dot dot-llm"></div>
+          <span>LLM Generation</span>
+        </div>
+        <div class="pipeline-arrow" aria-hidden="true">→</div>
+        <div class="pipeline-badge">
+          <div class="pipeline-dot dot-rag"></div>
+          <span>RAG Retrieval</span>
+        </div>
+        <div class="pipeline-arrow" aria-hidden="true">→</div>
+        <div class="pipeline-badge">
+          <div class="pipeline-dot dot-verify"></div>
+          <span>Evidence Verification</span>
+        </div>
+        <div class="pipeline-arrow" aria-hidden="true">→</div>
+        <div class="pipeline-badge">
+          <div class="pipeline-dot dot-risk"></div>
+          <span>Risk Classification</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Results Section ─── -->
+    <section
+      id="results-section"
+      class="results-section"
+      aria-labelledby="results-heading"
+      aria-live="polite"
+      aria-atomic="false"
+      hidden
+    >
+      <h2 id="results-heading" class="section-heading">Verification Report</h2>
+
+      <!-- ── Meta Row: Date + Status ── -->
+      <div class="result-meta-row">
+        <div class="glass-card result-card meta-card" id="card-date">
+          <div class="card-label">Verification Date</div>
+          <div class="card-value" id="result-date">—</div>
+        </div>
+        <div class="glass-card result-card status-card" id="card-status">
+          <div class="card-label">Verification Status</div>
+          <div class="status-badge-wrap">
+            <div class="status-badge" id="result-status-badge">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Question + Answer ── -->
+      <div class="glass-card result-card full-card" id="card-answer">
+        <div class="card-label">Question Asked</div>
+        <div class="card-value question-display" id="result-question">—</div>
+        <div class="card-divider"></div>
+        <div class="card-label">Generated Answer <span class="label-tag">LLM</span></div>
+        <div class="card-value answer-display" id="result-answer">—</div>
+      </div>
+
+      <!-- ── Risk + Confidence Row ── -->
+      <div class="result-row-2">
+        <!-- Hallucination Risk -->
+        <div class="glass-card result-card risk-card" id="card-risk">
+          <div class="card-label">Hallucination Risk</div>
+          <div class="risk-display">
+            <div class="risk-level-badge" id="result-risk-badge">—</div>
+            <div class="risk-bar-wrap" aria-label="Risk meter">
+              <div class="risk-bar" id="result-risk-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confidence -->
+        <div class="glass-card result-card confidence-card" id="card-confidence">
+          <div class="card-label">Confidence Score</div>
+          <div class="confidence-display">
+            <div class="confidence-ring-wrap">
+              <svg class="confidence-ring" viewBox="0 0 80 80" aria-hidden="true">
+                <circle class="ring-track" cx="40" cy="40" r="32"/>
+                <circle class="ring-fill" id="confidence-ring-fill" cx="40" cy="40" r="32"
+                  stroke-dasharray="201 201"
+                  stroke-dashoffset="201"
+                />
+              </svg>
+              <span class="confidence-value" id="result-confidence">—</span>
+            </div>
+            <div class="confidence-label" id="result-confidence-label">Awaiting analysis</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Analysis Summary ── -->
+      <div class="glass-card result-card full-card" id="card-summary">
+        <div class="card-label">Analysis Summary</div>
+        <div class="card-value summary-text" id="result-summary">—</div>
+      </div>
+
+      <!-- ── Evidence + Source Row ── -->
+      <div class="result-row-evidence">
+        <!-- Evidence -->
+        <div class="glass-card result-card evidence-card" id="card-evidence">
+          <div class="card-label">
+            Verification Details / Evidence
+            <span class="label-tag tag-rag">RAG</span>
+          </div>
+          <div class="evidence-status-row">
+            <div class="evidence-status-badge" id="result-evidence-status">—</div>
+            <div class="verification-method" id="result-verification-method">—</div>
+          </div>
+          <blockquote class="evidence-text" id="result-evidence-text">
+            <span class="evidence-placeholder">Evidence will appear after analysis</span>
+          </blockquote>
+          <div class="verification-outcome" id="result-verification-outcome"></div>
+          
+          <button class="see-why-btn" id="see-why-btn" aria-expanded="false" aria-controls="see-why-content" hidden>
+            See Why
+            <svg class="chevron-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <div id="see-why-content" class="see-why-content" hidden>
+            <div class="explanation-section">
+              <div class="card-label">Risk Explanation</div>
+              <div class="card-value explanation-text" id="result-risk-explanation">—</div>
+            </div>
+            <div class="recommendation-section">
+              <div class="card-label">Recommended Action</div>
+              <div class="recommendation-content">
+                <div class="rec-icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 2l2.09 4.26L17 7.27l-3.5 3.41.83 4.82L10 13.27l-4.33 2.23.83-4.82L3 7.27l4.91-.71L10 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="card-value rec-text" id="result-recommendation">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Source Column -->
+        <div class="source-column">
+          <!-- Source -->
+          <div class="glass-card result-card source-card" id="card-source">
+            <div class="card-label">Source</div>
+            <div class="source-value" id="result-source">—</div>
+            <div class="source-status-badge" id="result-source-status">—</div>
+          </div>
+          <!-- Source Reliability -->
+          <div class="glass-card result-card reliability-card" id="card-reliability">
+            <div class="card-label">Source Reliability</div>
+            <div class="reliability-indicator" id="result-reliability">
+              <div class="reliability-dots" id="result-reliability-dots">
+                <span class="rdot"></span>
+                <span class="rdot"></span>
+                <span class="rdot"></span>
+                <span class="rdot"></span>
+                <span class="rdot"></span>
+              </div>
+              <span class="reliability-label" id="result-reliability-label">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- ── Important Notice ── -->
+      <div class="glass-card result-card important-card" id="card-important">
+        <div class="card-label">
+          <svg class="label-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          Important
+        </div>
+        <div class="important-text" id="result-important">
+          This verification is based on real evidence retrieved from external sources.
+          Results reflect semantic similarity between the AI-generated answer and retrieved evidence.
+          Always cross-check critical information with authoritative primary sources.
+        </div>
+      </div>
+
+      <!-- ── Status Guide ── -->
+      <div class="glass-card result-card guide-card" id="card-guide">
+        <div class="card-label">Status Guide</div>
+        <div class="guide-grid">
+          <div class="guide-item">
+            <div class="guide-badge guide-verified">Verified</div>
+            <p>Answer is strongly supported by retrieved evidence (≥65% similarity)</p>
+          </div>
+          <div class="guide-item">
+            <div class="guide-badge guide-partial">Partially Supported</div>
+            <p>Answer has moderate evidence support (40–64% similarity)</p>
+          </div>
+          <div class="guide-item">
+            <div class="guide-badge guide-not-supported">Not Supported</div>
+            <p>Answer has weak evidence support (20–39% similarity)</p>
+          </div>
+          <div class="guide-item">
+            <div class="guide-badge guide-unable">Unable to Verify</div>
+            <p>Insufficient evidence retrieved (&lt;20% similarity)</p>
+          </div>
+        </div>
+
+        <div class="card-divider"></div>
+        <div class="card-label" style="margin-top: 0.5rem;">Risk Levels</div>
+        <div class="risk-guide-row">
+          <span class="rg-badge rg-none">NO Risk</span>
+          <span class="rg-badge rg-vlow">Very Low</span>
+          <span class="rg-badge rg-low">Low</span>
+          <span class="rg-badge rg-med">Medium</span>
+          <span class="rg-badge rg-high">High</span>
+        </div>
+      </div>
+
+
+
+    </section>
+
+    <!-- ─── Empty State ─── -->
+    <div id="empty-state" class="empty-state" aria-label="No analysis yet">
+      <div class="empty-icon" aria-hidden="true">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" stroke="url(#emptyGrad)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <path d="M22 28c0-5.52 4.48-10 10-10s10 4.48 10 10c0 4.41-2.85 8.16-6.84 9.47L34 40H30l-.16-2.53C26.85 36.16 22 31.41 22 28z"
+            stroke="url(#emptyGrad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="30" y="43" width="4" height="4" rx="2" fill="url(#emptyGrad)"/>
+          <defs>
+            <linearGradient id="emptyGrad" x1="2" y1="2" x2="62" y2="62" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <p class="empty-title">No analysis yet</p>
+      <p class="empty-sub">Enter any question above and click <strong>Analyze Answer</strong> to begin.</p>
+    </div>
+
+    <!-- ─── Global Error Banner ─── -->
+    <div id="global-error" class="global-error glass-card" role="alert" aria-live="assertive" hidden>
+      <div class="error-icon" aria-hidden="true">⚠</div>
+      <div class="error-content">
+        <div class="error-title" id="global-error-title">Analysis failed</div>
+        <div class="error-detail" id="global-error-detail"></div>
+      </div>
+      <button class="error-close" id="error-close-btn" aria-label="Dismiss error">✕</button>
+    </div>
+
+  </main>
+
+  <!-- ========================================================
+       FOOTER
+  ======================================================== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-inner">
+      <span>AI Hallucination Stress Tester</span>
+      <span class="footer-sep">·</span>
+      <span>LLM + RAG + Semantic Verification</span>
+      <span class="footer-sep">·</span>
+      <span>Portfolio Project</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
